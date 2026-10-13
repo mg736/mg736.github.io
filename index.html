@@ -127,6 +127,23 @@
   .sent .tr b{color:var(--ink)}
   /* trace letters */
   .trace{font-family:var(--f-pa);font-size:3.4rem;color:transparent;-webkit-text-stroke:1.5px var(--jamun);line-height:1.1}
+  /* conversation */
+  .chat{display:flex;flex-direction:column;gap:10px;min-height:240px;max-height:52vh;overflow-y:auto;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+  .bubble{max-width:85%;padding:10px 13px;border-radius:14px;font-size:.95rem;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+  .bubble.me{align-self:flex-end;background:var(--ink);color:var(--paper);border-bottom-right-radius:4px}
+  .bubble.tutor{align-self:flex-start;background:var(--saffron-soft);color:var(--ink);border-bottom-left-radius:4px}
+  .bubble.tutor .txt{font-family:var(--f-pa);font-size:1.05rem}
+  .bubble .spk{margin-left:6px;background:none;border:0;color:var(--saffron);cursor:pointer;font-size:1rem}
+  .bubble.hint2{font-size:.9rem;color:var(--muted);background:transparent;border:1px dashed var(--line)}
+  .bubble.typing{color:var(--muted)}
+  .convbar{display:flex;gap:8px;align-items:center;margin-top:12px}
+  .convbar .mic{flex:none;width:52px;height:52px;border-radius:50%;border:0;background:var(--saffron);color:#fff;font-size:22px;cursor:pointer;box-shadow:var(--shadow)}
+  .convbar .mic.on{background:var(--jamun);animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+  .convbar input{flex:1;min-width:0;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);font-family:inherit;font-size:.95rem}
+  .sendbtn{flex:none;background:var(--ink);color:var(--paper);border:0;padding:12px 16px;border-radius:12px;font-weight:700;cursor:pointer;font-family:inherit}
+  .wurl{width:100%;padding:11px 13px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);font-family:inherit;margin:6px 0 10px}
+  .small{font-size:.8rem;color:var(--muted)}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Hanken+Grotesk:wght@400;500;600;700&family=Noto+Serif+Gurmukhi:wght@500;600;700&display=swap">
@@ -150,6 +167,7 @@
     <button class="tab" role="tab" data-view="vocab" aria-selected="false">Vocabulary</button>
     <button class="tab" role="tab" data-view="numbers" aria-selected="false">Numbers</button>
     <button class="tab" role="tab" data-view="practice" aria-selected="false">Practice</button>
+    <button class="tab" role="tab" data-view="converse" aria-selected="false">🎙 Converse</button>
   </nav>
 </header>
 
@@ -363,6 +381,17 @@ const views={
           <span class="pa">${esc(epa)}</span><span class="en">${esc(een)}</span></button>`).join('')}</div>
       </div>`).join('')}`;
   },
+  converse(){
+    return `<div class="intro"><h2>Talk with a tutor</h2>
+      <p>Speak or type, and a friendly AI tutor replies in Punjabi (Gurmukhi) with romanization — and reads it aloud so you can repeat. Tap the mic and try "ਸਤ ਸ੍ਰੀ ਅਕਾਲ".</p></div>
+      <div id="convSetup"></div>
+      <div id="convChat" class="chat" hidden></div>
+      <div id="convBar" class="convbar" hidden>
+        <button id="micBtn" class="mic" aria-label="Tap to speak">🎤</button>
+        <input id="convInput" type="text" placeholder="Type in Punjabi or English…" autocomplete="off">
+        <button id="convSend" class="sendbtn">Send</button>
+      </div>`;
+  },
   practice(){
     return `<div class="intro"><h2>Practice quiz</h2><p>Match the Gurmukhi word to its meaning. Listen, then choose.</p></div>
       <div class="quiz"><div class="qmeta"><span id="qcount"></span>
@@ -410,6 +439,79 @@ function renderQ(){
   });
 }
 
+/* ---------- conversation (AI voice tutor) ---------- */
+let workerUrl=''; try{workerUrl=localStorage.getItem('bolpunjabi_worker')||''}catch(e){}
+let convo=[]; let rec=null; let listening=false;
+function gurmukhiOnly(s){ // speak only the Gurmukhi part, drop (roman) and [gloss]
+  const out=String(s).split('\n').map(l=>l.split(/[\(\[]/)[0].trim()).filter(Boolean).join('. ');
+  return out||String(s);
+}
+function speakPunjabi(s){ speak(gurmukhiOnly(s)); }
+function convDraw(m){
+  const chat=document.getElementById('convChat'); if(!chat)return;
+  const b=document.createElement('div');
+  b.className='bubble '+(m.role==='user'?'me':'tutor');
+  if(m.role==='assistant'){
+    const t=document.createElement('span'); t.className='txt'; t.textContent=m.content; b.appendChild(t);
+    const s=document.createElement('button'); s.className='spk'; s.textContent='♪'; s.setAttribute('aria-label','Replay'); s.onclick=()=>speakPunjabi(m.content); b.appendChild(s);
+  } else b.textContent=m.content;
+  chat.appendChild(b); chat.scrollTop=chat.scrollHeight;
+}
+function renderConvo(){
+  const chat=document.getElementById('convChat'); if(!chat)return; chat.innerHTML='';
+  if(!convo.length){ const h=document.createElement('div'); h.className='bubble tutor hint2'; h.textContent='ਸਤ ਸ੍ਰੀ ਅਕਾਲ! Tap the mic and say hello, or type below.'; chat.appendChild(h); return; }
+  convo.forEach(convDraw);
+}
+async function convSend(text){
+  text=(text||'').trim(); if(!text||!workerUrl)return;
+  convo.push({role:'user',content:text}); convDraw(convo[convo.length-1]);
+  const input=document.getElementById('convInput'); if(input)input.value='';
+  const chat=document.getElementById('convChat');
+  const typing=document.createElement('div'); typing.className='bubble tutor typing'; typing.textContent='…'; chat.appendChild(typing); chat.scrollTop=chat.scrollHeight;
+  try{
+    const r=await fetch(workerUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:convo})});
+    typing.remove();
+    if(!r.ok){ const e=await r.json().catch(()=>({})); const msg={role:'assistant',content:e.error||'Sorry, the tutor is unavailable right now.'}; convo.push(msg); convDraw(msg); return; }
+    const data=await r.json(); const msg={role:'assistant',content:data.reply||'…'}; convo.push(msg); convDraw(msg); speakPunjabi(msg.content);
+  }catch(e){ typing.remove(); const msg={role:'assistant',content:'Network error — check your connection and try again.'}; convo.push(msg); convDraw(msg); }
+}
+function toggleMic(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const mic=document.getElementById('micBtn'); const input=document.getElementById('convInput');
+  if(!SR){ if(input){input.placeholder='Speech input not supported here — type instead'; input.focus();} return; }
+  if(listening){ try{rec.stop()}catch(e){} return; }
+  rec=new SR(); rec.lang='pa-IN'; rec.interimResults=true; rec.maxAlternatives=1;
+  let finalText='';
+  listening=true; mic.classList.add('on');
+  rec.onresult=e=>{ let interim=''; finalText=''; for(const res of e.results){ if(res.isFinal)finalText+=res[0].transcript; else interim+=res[0].transcript; } if(input)input.value=finalText||interim; };
+  rec.onerror=()=>{ listening=false; mic.classList.remove('on'); };
+  rec.onend=()=>{ listening=false; mic.classList.remove('on'); if(finalText.trim())convSend(finalText); };
+  try{rec.start()}catch(e){ listening=false; mic.classList.remove('on'); }
+}
+function initConverse(){
+  const setup=document.getElementById('convSetup'), chat=document.getElementById('convChat'), bar=document.getElementById('convBar');
+  if(!setup)return;
+  if(!workerUrl){
+    chat.hidden=true; bar.hidden=true;
+    setup.innerHTML=`<div class="lesson"><h3>One-time setup</h3>
+      <p>The tutor talks through your own free AI proxy. Paste the Worker URL from <code>wrangler deploy</code>:</p>
+      <input id="wurl" type="url" inputmode="url" class="wurl" placeholder="https://bolpunjabi-voice.xxxx.workers.dev">
+      <button id="wsave" class="sendbtn">Connect</button>
+      <p class="small">No proxy yet? Get a free key at aistudio.google.com/apikey, then run: wrangler login → wrangler secret put GEMINI_API_KEY → wrangler deploy.</p></div>`;
+    document.getElementById('wsave').onclick=()=>{
+      const f=document.getElementById('wurl'); const v=f.value.trim();
+      if(!/^https:\/\/.+/.test(v)){ f.style.borderColor='#d14'; f.focus(); return; }
+      workerUrl=v; try{localStorage.setItem('bolpunjabi_worker',v)}catch(e){} convo=[]; initConverse();
+    };
+    return;
+  }
+  setup.innerHTML=''; chat.hidden=false; bar.hidden=false; renderConvo();
+  document.getElementById('micBtn').onclick=toggleMic;
+  document.getElementById('convSend').onclick=()=>convSend(document.getElementById('convInput').value);
+  const input=document.getElementById('convInput');
+  input.onkeydown=e=>{ if(e.key==='Enter')convSend(input.value); };
+}
+
 /* ---------- routing ---------- */
 function show(view){
   el.innerHTML=views[view]();
@@ -417,6 +519,7 @@ function show(view){
   try{localStorage.setItem('bolpunjabi_tab',view)}catch(e){}
   window.scrollTo({top:0,behavior:'smooth'});
   if(view==='practice')startQuiz();
+  if(view==='converse')initConverse();
 }
 document.getElementById('tabs').addEventListener('click',e=>{
   const t=e.target.closest('.tab'); if(t)show(t.dataset.view);
