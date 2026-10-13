@@ -452,7 +452,7 @@ function renderQ(){
 }
 
 /* ---------- conversation (AI voice tutor) ---------- */
-let workerUrl=''; try{workerUrl=localStorage.getItem('bolpunjabi_worker')||''}catch(e){}
+let workerUrl='https://bolpunjabi-voice.mgpunjabi.workers.dev'; try{const s=localStorage.getItem('bolpunjabi_worker'); if(s)workerUrl=s;}catch(e){}
 let convo=[]; let rec=null; let listening=false;
 function gurmukhiOnly(s){ // speak only the Gurmukhi part, drop (roman) and [gloss]
   const out=String(s).split('\n').map(l=>l.split(/[\(\[]/)[0].trim()).filter(Boolean).join('. ');
