@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#e8830c">
+<meta name="description" content="Learn and speak Punjabi: Gurmukhi alphabet, phrases, pronunciation and practice.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>html,body{margin:0}</style>
+<title>Bol Punjabi</title>
+<style>
+  /* Layout: warm ivory "paper" app, saffron + jamun(plum) + peacock-teal accents grounded in Punjabi/Phulkari palette; sticky header, tabbed sections, card grids */
+  :root{
+    --paper:#faf4e8; --card:#fffdf8; --ink:#241c17; --muted:#7a6a58;
+    --line:#e7dcc6; --saffron:#e8830c; --saffron-soft:#fff0da;
+    --jamun:#7d2c53; --teal:#0e7c74; --gold:#c69314;
+    --shadow:0 1px 2px rgba(60,40,15,.06),0 8px 24px rgba(90,55,15,.07);
+    --r:16px;
+    --f-disp:"Fraunces",Georgia,serif;
+    --f-body:"Hanken Grotesk",system-ui,-apple-system,sans-serif;
+    --f-pa:"Noto Serif Gurmukhi","Noto Sans Gurmukhi",serif;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --paper:#191410; --card:#221b15; --ink:#f3e9db; --muted:#b09a82;
+    --line:#392e24; --saffron:#f7a63a; --saffron-soft:#2e2112;
+    --jamun:#e58bb2; --teal:#4fc8bd; --gold:#e0b64a;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.35);
+    color-scheme:dark;
+  }}
+  :root[data-theme="dark"]{
+    --paper:#191410; --card:#221b15; --ink:#f3e9db; --muted:#b09a82;
+    --line:#392e24; --saffron:#f7a63a; --saffron-soft:#2e2112;
+    --jamun:#e58bb2; --teal:#4fc8bd; --gold:#e0b64a;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.35);
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);font-family:var(--f-body);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding-inline:16px}
+
+  /* Header */
+  header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;align-items:center;gap:12px;padding-block:12px}
+  .mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,var(--saffron),var(--jamun));display:grid;place-items:center;color:#fff;font-family:var(--f-pa);font-size:22px;flex:none;box-shadow:var(--shadow)}
+  .brand h1{font-family:var(--f-disp);font-weight:600;font-size:1.28rem;margin:0;letter-spacing:-.01em}
+  .brand p{margin:0;font-size:.74rem;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+  .theme-btn{margin-left:auto;background:var(--card);border:1px solid var(--line);color:var(--ink);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:16px;display:grid;place-items:center}
+
+  /* Tabs */
+  nav.tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 16px 12px;scrollbar-width:none}
+  nav.tabs::-webkit-scrollbar{display:none}
+  .tab{flex:none;border:1px solid var(--line);background:var(--card);color:var(--muted);padding:8px 15px;border-radius:999px;font-size:.86rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:.15s}
+  .tab[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+  main{padding-block:8px 48px}
+  .intro{margin:6px 2px 18px}
+  .intro h2{font-family:var(--f-disp);font-size:1.5rem;font-weight:600;margin:0 0 4px;text-wrap:balance}
+  .intro p{margin:0;color:var(--muted);max-width:60ch}
+
+  /* Cards grid */
+  .grid{display:grid;gap:12px}
+  .g-letters{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+  .g-cards{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+  .g-num{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);position:relative}
+  button.card{cursor:pointer;text-align:left;color:inherit;font-family:inherit;width:100%}
+  button.card:focus-visible{outline:2.5px solid var(--saffron);outline-offset:2px}
+
+  /* letter tile */
+  .tile{padding:14px 10px 12px;display:flex;flex-direction:column;align-items:center;gap:2px;transition:transform .12s}
+  .tile:active{transform:scale(.96)}
+  .tile .pa{font-family:var(--f-pa);font-size:2.5rem;line-height:1.1;color:var(--ink)}
+  .tile .rom{font-weight:700;font-size:.9rem}
+  .tile .en{font-size:.72rem;color:var(--muted);text-align:center;min-height:1.6em}
+  .spk{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:7px;background:var(--saffron-soft);color:var(--saffron);display:grid;place-items:center;font-size:12px}
+
+  /* phrase / vocab card */
+  .pc{padding:16px 16px 14px;display:flex;flex-direction:column;gap:6px}
+  .pc .pa{font-family:var(--f-pa);font-size:1.7rem;line-height:1.3;color:var(--jamun)}
+  .pc .rom{font-weight:700;font-size:1rem}
+  .pc .en{color:var(--muted);font-size:.9rem}
+  .pc .spk{position:static;width:32px;height:32px;border-radius:9px;align-self:flex-start;margin-top:2px;font-size:15px}
+
+  .section-h{font-family:var(--f-disp);font-size:1.12rem;font-weight:600;margin:26px 2px 12px;display:flex;align-items:center;gap:8px}
+  .section-h::before{content:"";width:18px;height:3px;border-radius:2px;background:var(--saffron)}
+
+  .hint{font-size:.82rem;color:var(--muted);background:var(--saffron-soft);border:1px solid var(--line);border-radius:12px;padding:10px 13px;margin:4px 2px 16px;display:flex;gap:9px;align-items:flex-start}
+  .hint b{color:var(--saffron)}
+
+  /* Quiz */
+  .quiz{max-width:520px;margin:0 auto}
+  .qcard{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:26px 22px;text-align:center}
+  .qmeta{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);font-weight:600;margin-bottom:18px}
+  .qprompt .pa{font-family:var(--f-pa);font-size:4rem;line-height:1.1;color:var(--jamun);margin:6px 0}
+  .qprompt .ask{font-size:.9rem;color:var(--muted)}
+  .opts{display:grid;gap:10px;margin-top:22px}
+  .opt{padding:14px;border-radius:13px;border:1.5px solid var(--line);background:var(--paper);font-size:1rem;font-weight:600;cursor:pointer;color:var(--ink);font-family:inherit;transition:.12s}
+  .opt:hover{border-color:var(--saffron)}
+  .opt.correct{background:color-mix(in srgb,var(--teal) 16%,var(--card));border-color:var(--teal);color:var(--teal)}
+  .opt.wrong{background:color-mix(in srgb,#d14 14%,var(--card));border-color:#d14;color:#d14}
+  .opt:disabled{cursor:default}
+  .qnext{margin-top:18px;background:var(--ink);color:var(--paper);border:0;padding:13px 22px;border-radius:12px;font-weight:700;font-size:.95rem;cursor:pointer;font-family:inherit}
+  .qnext[hidden]{display:none}
+  .score-pill{display:inline-flex;gap:6px;align-items:center;background:var(--saffron-soft);color:var(--saffron);padding:6px 12px;border-radius:999px;font-weight:700;font-size:.82rem}
+
+  footer{text-align:center;color:var(--muted);font-size:.78rem;padding:20px 16px 8px;border-top:1px solid var(--line);margin-top:20px}
+  footer .pa{font-family:var(--f-pa)}
+  /* lessons */
+  .lesson{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px 17px;margin-bottom:12px}
+  .lesson h3{margin:0 0 4px;font-family:var(--f-disp);font-size:1.05rem;font-weight:600;display:flex;align-items:center;gap:8px}
+  .lesson h3 .chip{font-family:var(--f-pa);background:var(--saffron-soft);color:var(--saffron);border-radius:8px;padding:1px 9px;font-size:1.1rem}
+  .lesson p{margin:0 0 10px;color:var(--muted);font-size:.9rem}
+  .ex-row{display:flex;flex-wrap:wrap;gap:8px}
+  .ex{display:inline-flex;align-items:baseline;gap:7px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:6px 13px;cursor:pointer;color:inherit;font-family:inherit;font-size:.9rem}
+  .ex .pa{font-family:var(--f-pa);font-size:1.15rem;color:var(--jamun)}
+  .ex .rom{font-weight:700}
+  .ex .en{color:var(--muted);font-size:.82rem}
+  /* sentence builder */
+  .sent{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px 17px;margin-bottom:12px}
+  .sent .lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--saffron);font-weight:700}
+  .sent .tmpl{font-family:var(--f-pa);font-size:1.6rem;color:var(--ink);margin:6px 0 2px;line-height:1.35}
+  .sent .tmpl u{text-decoration:none;color:var(--saffron);border-bottom:2.5px dashed var(--saffron)}
+  .sent .tr{color:var(--muted);font-size:.9rem;margin-bottom:10px}
+  .sent .tr b{color:var(--ink)}
+  /* trace letters */
+  .trace{font-family:var(--f-pa);font-size:3.4rem;color:transparent;-webkit-text-stroke:1.5px var(--jamun);line-height:1.1}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Hanken+Grotesk:wght@400;500;600;700&family=Noto+Serif+Gurmukhi:wght@500;600;700&display=swap">
+</head>
+<body>
+<header>
+  <div class="wrap bar">
+    <div class="mark">ੳ</div>
+    <div class="brand">
+      <h1>Bol Punjabi</h1>
+      <p>ਪੰਜਾਬੀ ਸਿੱਖੋ · Learn &amp; Speak</p>
+    </div>
+    <button class="theme-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle light or dark theme">☾</button>
+  </div>
+  <nav class="tabs" id="tabs" role="tablist">
+    <button class="tab" role="tab" data-view="alphabet" aria-selected="true">ਪੈਂਤੀ Alphabet</button>
+    <button class="tab" role="tab" data-view="writing" aria-selected="false">Writing</button>
+    <button class="tab" role="tab" data-view="pronounce" aria-selected="false">Pronunciation</button>
+    <button class="tab" role="tab" data-view="phrases" aria-selected="false">Phrases</button>
+    <button class="tab" role="tab" data-view="sentences" aria-selected="false">Sentences</button>
+    <button class="tab" role="tab" data-view="vocab" aria-selected="false">Vocabulary</button>
+    <button class="tab" role="tab" data-view="numbers" aria-selected="false">Numbers</button>
+    <button class="tab" role="tab" data-view="practice" aria-selected="false">Practice</button>
+  </nav>
+</header>
+
+<main class="wrap"><div id="view"></div></main>
+
+<footer>
+  <span class="pa">ਸਤ ਸ੍ਰੀ ਅਕਾਲ</span> — tap any card to hear it. Built for learners of Punjabi (Gurmukhi).
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.3/confetti.browser.min.js"></script>
+<script>
+/* ---------- speech ---------- */
+let paVoice=null;
+function pickVoice(){
+  const v=speechSynthesis.getVoices();
+  paVoice = v.find(x=>/pa[-_]?IN/i.test(x.lang)) || v.find(x=>/^pa/i.test(x.lang))
+         || v.find(x=>/hi[-_]?IN/i.test(x.lang)) || v.find(x=>/^hi/i.test(x.lang)) || null;
+}
+if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; }
+function speak(text){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang = paVoice?paVoice.lang:'pa-IN'; if(paVoice)u.voice=paVoice;
+  u.rate=.82; u.pitch=1;
+  speechSynthesis.speak(u);
+}
+
+/* ---------- data ---------- */
+const vowels=[
+  ["ਅ","a","as in 'a'"],["ਆ","aa","father"],["ਇ","i","sit"],["ਈ","ee","see"],
+  ["ਉ","u","put"],["ਊ","oo","food"],["ਏ","e","they"],["ਐ","ai","air"],
+  ["ਓ","o","go"],["ਔ","au","caught"]
+];
+const consonants=[
+  ["ੳ","ūṛā"],["ਅ","airā"],["ੲ","īṛī"],["ਸ","sassā"],["ਹ","hāhā"],
+  ["ਕ","kakkā"],["ਖ","khakhā"],["ਗ","gaggā"],["ਘ","ghaghā"],["ਙ","ṅaṅā"],
+  ["ਚ","chachā"],["ਛ","chhachhā"],["ਜ","jajjā"],["ਝ","jhajhā"],["ਞ","ñaññā"],
+  ["ਟ","ṭaiṅkā"],["ਠ","ṭhaṭṭhā"],["ਡ","ḍaḍḍā"],["ਢ","ḍhaḍhā"],["ਣ","ṇāṇā"],
+  ["ਤ","tattā"],["ਥ","thatthā"],["ਦ","daddā"],["ਧ","dhadhā"],["ਨ","nannā"],
+  ["ਪ","pappā"],["ਫ","phapphā"],["ਬ","babbā"],["ਭ","bhabhā"],["ਮ","mammā"],
+  ["ਯ","yayyā"],["ਰ","rārā"],["ਲ","lallā"],["ਵ","vāvā"],["ੜ","ṛāṛā"]
+];
+const phrases=[
+  ["ਸਤ ਸ੍ਰੀ ਅਕਾਲ","Sat Sri Akal","Hello / Greetings"],
+  ["ਤੁਹਾਡਾ ਨਾਮ ਕੀ ਹੈ?","Tuhada naam ki hai?","What is your name?"],
+  ["ਮੇਰਾ ਨਾਮ … ਹੈ","Mera naam … hai","My name is …"],
+  ["ਤੁਸੀਂ ਕਿਵੇਂ ਹੋ?","Tusi kive ho?","How are you?"],
+  ["ਮੈਂ ਠੀਕ ਹਾਂ","Main theek haan","I am fine"],
+  ["ਧੰਨਵਾਦ","Dhanvaad","Thank you"],
+  ["ਮਿਹਰਬਾਨੀ ਕਰਕੇ","Meharbani karke","Please"],
+  ["ਹਾਂ ਜੀ","Haan ji","Yes"],
+  ["ਨਹੀਂ ਜੀ","Nahi ji","No"],
+  ["ਮਾਫ਼ ਕਰਨਾ","Maaf karna","Sorry / Excuse me"],
+  ["ਕੀ ਹਾਲ ਹੈ?","Ki haal hai?","What's up?"],
+  ["ਫਿਰ ਮਿਲਾਂਗੇ","Phir milange","See you again"]
+];
+const vocab={
+  "Family — ਪਰਿਵਾਰ":[
+    ["ਮਾਤਾ","mata","mother"],["ਪਿਤਾ","pita","father"],["ਭਰਾ","bhra","brother"],
+    ["ਭੈਣ","bhain","sister"],["ਦਾਦਾ","dada","grandfather"],["ਦਾਦੀ","dadi","grandmother"],
+    ["ਪੁੱਤਰ","puttar","son"],["ਧੀ","dhee","daughter"]
+  ],
+  "Food — ਖਾਣਾ":[
+    ["ਰੋਟੀ","roti","bread"],["ਪਾਣੀ","pani","water"],["ਦੁੱਧ","duddh","milk"],
+    ["ਚਾਹ","chah","tea"],["ਦਾਲ","daal","lentils"],["ਸਬਜ਼ੀ","sabzi","vegetable"],
+    ["ਚੌਲ","chaul","rice"],["ਲੱਸੀ","lassi","yogurt drink"]
+  ],
+  "Colours — ਰੰਗ":[
+    ["ਲਾਲ","laal","red"],["ਹਰਾ","hara","green"],["ਨੀਲਾ","neela","blue"],
+    ["ਪੀਲਾ","peela","yellow"],["ਕਾਲਾ","kala","black"],["ਚਿੱਟਾ","chitta","white"]
+  ],
+  "Everyday verbs — ਕਿਰਿਆ":[
+    ["ਖਾਣਾ","khana","to eat"],["ਪੀਣਾ","peena","to drink"],["ਜਾਣਾ","jana","to go"],
+    ["ਆਉਣਾ","auna","to come"],["ਬੋਲਣਾ","bolna","to speak"],["ਸੁਣਨਾ","sunna","to listen"]
+  ],
+  "Travel — ਸਫ਼ਰ":[
+    ["ਹਵਾਈ ਅੱਡਾ","havai adda","airport"],["ਰੇਲਗੱਡੀ","relgaddi","train"],["ਬੱਸ","bus","bus"],
+    ["ਸੜਕ","sarak","road"],["ਟਿਕਟ","tikat","ticket"],["ਨਕਸ਼ਾ","naksha","map"],
+    ["ਖੱਬੇ","khabbe","left"],["ਸੱਜੇ","sajje","right"],["ਸਿੱਧਾ","siddha","straight"]
+  ],
+  "Shopping — ਖਰੀਦਦਾਰੀ":[
+    ["ਦੁਕਾਨ","dukaan","shop"],["ਬਜ਼ਾਰ","bazaar","market"],["ਕੀਮਤ","keemat","price"],
+    ["ਪੈਸੇ","paise","money"],["ਮਹਿੰਗਾ","mehnga","expensive"],["ਸਸਤਾ","sasta","cheap"],
+    ["ਖਰੀਦਣਾ","kharidna","to buy"]
+  ]
+};
+const numbersMore={
+  "Eleven to twenty — ੧੧–੨੦":[
+    ["੧੧","11","gyarah"],["੧੨","12","baarah"],["੧੩","13","terah"],["੧੪","14","chaudah"],
+    ["੧੫","15","pandrah"],["੧੬","16","solah"],["੧੭","17","satarah"],["੧੮","18","atharah"],
+    ["੧੯","19","unni"],["੨੦","20","vih"]
+  ],
+  "Tens & hundred — ਦਹਾਈਆਂ":[
+    ["੩੦","30","tih"],["੪੦","40","chali"],["੫੦","50","panjah"],["੬੦","60","sath"],
+    ["੭੦","70","sattar"],["੮੦","80","assi"],["੯੦","90","nabbe"],["੧੦੦","100","sau"]
+  ]
+};
+const sentences=[
+  ["Introduce yourself","ਮੇਰਾ ਨਾਮ ___ ਹੈ।","Mera naam ___ hai.","My name is ___.",
+    [["ਮੇਰਾ ਨਾਮ ਜੱਸੀ ਹੈ।","Mera naam Jassi hai.","My name is Jassi."]]],
+  ["Point something out","ਇਹ ___ ਹੈ।","Eh ___ hai.","This is ___.",
+    [["ਇਹ ਰੋਟੀ ਹੈ।","Eh roti hai.","This is bread."],
+     ["ਇਹ ਮੇਰਾ ਭਰਾ ਹੈ।","Eh mera bhra hai.","This is my brother."]]],
+  ["Say what you want","ਮੈਨੂੰ ___ ਚਾਹੀਦਾ ਹੈ।","Mainu ___ chahida hai.","I want / need ___.",
+    [["ਮੈਨੂੰ ਪਾਣੀ ਚਾਹੀਦਾ ਹੈ।","Mainu pani chahida hai.","I want water."],
+     ["ਮੈਨੂੰ ਚਾਹ ਚਾਹੀਦੀ ਹੈ।","Mainu chah chahidi hai.","I want tea."]]],
+  ["Say what you like","ਮੈਨੂੰ ___ ਪਸੰਦ ਹੈ।","Mainu ___ pasand hai.","I like ___.",
+    [["ਮੈਨੂੰ ਲੱਸੀ ਪਸੰਦ ਹੈ।","Mainu lassi pasand hai.","I like lassi."]]],
+  ["Ask where something is","___ ਕਿੱਥੇ ਹੈ?","___ kithe hai?","Where is ___?",
+    [["ਬੱਸ ਅੱਡਾ ਕਿੱਥੇ ਹੈ?","Bus adda kithe hai?","Where is the bus stop?"],
+     ["ਦੁਕਾਨ ਕਿੱਥੇ ਹੈ?","Dukaan kithe hai?","Where is the shop?"]]]
+];
+const numbers=[
+  ["੧","1","ikk"],["੨","2","do"],["੩","3","tinn"],["੪","4","char"],["੫","5","panj"],
+  ["੬","6","chhe"],["੭","7","satt"],["੮","8","atth"],["੯","9","nau"],["੧੦","10","das"]
+];
+
+/* ---------- render helpers ---------- */
+const el=document.getElementById('view');
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function tile([pa,rom,en]){
+  return `<button class="card tile" data-say="${esc(pa)}">
+    <span class="spk">♪</span><span class="pa">${esc(pa)}</span>
+    <span class="rom">${esc(rom)}</span><span class="en">${esc(en||'')}</span></button>`;
+}
+function pcard([pa,rom,en]){
+  return `<button class="card pc" data-say="${esc(pa)}">
+    <span class="pa">${esc(pa)}</span><span class="rom">${esc(rom)}</span>
+    <span class="en">${esc(en)}</span><span class="spk">♪</span></button>`;
+}
+
+const views={
+  alphabet(){
+    return `<div class="intro"><h2>The Gurmukhi script</h2>
+      <p>Punjabi is written in Gurmukhi. Start with the ten vowel sounds, then the 35 base letters — the <em>Painti Akhari</em>. Tap any letter to hear it.</p></div>
+      <div class="hint"><span>👂</span><div><b>Tip:</b> Gurmukhi is a syllabic script — each consonant carries an inherent "a" sound, shaped by vowel marks (<i>laga matra</i>).</div></div>
+      <div class="section-h">Vowel sounds · ਸ੍ਵਰ</div>
+      <div class="grid g-letters">${vowels.map(tile).join('')}</div>
+      <div class="section-h">35 letters · ਪੈਂਤੀ ਅੱਖਰੀ</div>
+      <div class="grid g-letters">${consonants.map(c=>tile([c[0],c[1],'']) ).join('')}</div>`;
+  },
+  phrases(){
+    return `<div class="intro"><h2>Say it out loud</h2>
+      <p>The phrases you need from day one — greetings, introductions and courtesies. Tap to hear each, then repeat after it.</p></div>
+      <div class="grid g-cards">${phrases.map(pcard).join('')}</div>`;
+  },
+  vocab(){
+    let h=`<div class="intro"><h2>Build your words</h2><p>Core vocabulary grouped by theme. Tap a word to hear its pronunciation.</p></div>`;
+    for(const [title,items] of Object.entries(vocab)){
+      h+=`<div class="section-h">${esc(title)}</div><div class="grid g-cards">${items.map(pcard).join('')}</div>`;
+    }
+    return h;
+  },
+  numbers(){
+    const block=arr=>`<div class="grid g-num">${arr.map(([pa,d,rom])=>`<button class="card tile" data-say="${esc(rom)}">
+        <span class="spk">♪</span><span class="pa">${esc(pa)}</span>
+        <span class="rom">${esc(rom)}</span><span class="en">${d}</span></button>`).join('')}</div>`;
+    let h=`<div class="intro"><h2>Counting · ਗਿਣਤੀ</h2>
+      <p>Gurmukhi has its own numerals. Learn one to ten first, then build up to a hundred.</p></div>
+      <div class="section-h">One to ten — ੧–੧੦</div>${block(numbers)}`;
+    for(const [title,arr] of Object.entries(numbersMore)){
+      h+=`<div class="section-h">${esc(title)}</div>${block(arr)}`;
+    }
+    return h;
+  },
+  writing(){
+    const traceSet=[...vowels.slice(0,4).map(v=>[v[0],v[1]]), ...consonants.slice(3,13)];
+    return `<div class="intro"><h2>Writing Gurmukhi</h2>
+      <p>Gurmukhi hangs from a top line. Get the three habits below right and your letters will look natural.</p></div>
+      <div class="lesson"><h3><span class="chip">—</span> The headline (ਸਿਰ ਲਕੀਰ)</h3>
+      <p>Almost every letter hangs <b>below a horizontal top line</b>. Write the body of the letter first, then connect it across the top. Words join into one continuous headline.</p></div>
+      <div class="lesson"><h3>Stroke direction</h3>
+      <p>Draw strokes <b>top-to-bottom</b> and <b>left-to-right</b>, the same as Latin. Curves open the way they face — ਸ and ਹ curl from the top.</p></div>
+      <div class="lesson"><h3>Vowel marks sit around the letter</h3>
+      <p>A consonant carries a built-in "a". Add a mark to change the vowel: <b>ਕ</b> ka → <b>ਕਾ</b> kaa → <b>ਕੀ</b> kee → <b>ਕੂ</b> koo. The mark attaches to the right, below, or above.</p>
+      <div class="ex-row">
+        <button class="ex" data-say="ਕ"><span class="pa">ਕ</span><span class="rom">ka</span></button>
+        <button class="ex" data-say="ਕਾ"><span class="pa">ਕਾ</span><span class="rom">kaa</span></button>
+        <button class="ex" data-say="ਕੀ"><span class="pa">ਕੀ</span><span class="rom">kee</span></button>
+        <button class="ex" data-say="ਕੂ"><span class="pa">ਕੂ</span><span class="rom">koo</span></button></div></div>
+      <div class="section-h">Trace these · ਲਿਖੋ</div>
+      <div class="hint"><span>✍️</span><div>Follow the outline with your finger or a stylus, then tap to hear it. Draw the body, then cap it with the headline.</div></div>
+      <div class="grid g-letters">${traceSet.map(([pa,rom])=>`<button class="card tile" data-say="${esc(pa)}">
+        <span class="spk">♪</span><span class="trace">${esc(pa)}</span>
+        <span class="rom">${esc(rom)}</span></button>`).join('')}</div>`;
+  },
+  pronounce(){
+    const L=(chip,title,body,exs)=>`<div class="lesson"><h3>${chip?`<span class="chip">${chip}</span>`:''}${title}</h3><p>${body}</p>${exs?`<div class="ex-row">${exs.map(([pa,rom,en])=>`<button class="ex" data-say="${esc(pa)}"><span class="pa">${esc(pa)}</span><span class="rom">${esc(rom)}</span>${en?`<span class="en">${esc(en)}</span>`:''}</button>`).join('')}</div>`:''}</div>`;
+    return `<div class="intro"><h2>How Punjabi sounds</h2>
+      <p>Four features shape the sound of a word. Tap any example to hear the difference.</p></div>
+      ${L('ਅ','The inherent vowel','Every consonant already says a short "a". ਕ is "ka", not just "k". You only write a vowel when it changes.',
+        [["ਕ","ka"],["ਘਰ","ghar","house"],["ਕਮਲ","kamal","lotus"]])}
+      ${L('ਂ','Nasal sounds (ਟਿੱਪੀ / ਬਿੰਦੀ)','A dot adds a nasal "n/m" hum through the nose — it changes meaning, so don\'t skip it.',
+        [["ਹਾਂ","haan","yes"],["ਮੈਂ","main","I"],["ਪੰਜਾਬ","Panjab","Punjab"]])}
+      ${L('ੱ','Doubling (ਅੱਧਕ)','This mark doubles the next consonant — hold it a beat longer. It separates words that are otherwise identical.',
+        [["ਦਸ","das","ten"],["ਦੱਸ","dass","tell"],["ਪੱਤਾ","patta","leaf"]])}
+      ${L('੍','Joined letters (ਪੈਰ)','A second consonant can tuck under the first to make a blend, like the "r" in ਸ੍ਰੀ.',
+        [["ਸ੍ਰੀ","sri","honorific"],["ਪ੍ਰੇਮ","prem","love"]])}
+      <div class="hint"><span>🔊</span><div><b>Voice note:</b> pronunciation plays through your device's text-to-speech. For the closest sound, install a Punjabi (pa-IN) voice in your system settings — otherwise a Hindi voice is used, which is close.</div></div>`;
+  },
+  sentences(){
+    return `<div class="intro"><h2>Build a sentence</h2>
+      <p>Five everyday patterns. Swap the <u style="text-decoration:none;color:var(--saffron);border-bottom:2.5px dashed var(--saffron)">underlined</u> slot with any word you know. Tap to hear.</p></div>
+      ${sentences.map(([lbl,pa,rom,en,exs])=>`<div class="sent">
+        <div class="lbl">${esc(lbl)}</div>
+        <button class="ex" data-say="${esc(pa.replace(/_+/g,''))}" style="border:0;background:none;padding:0;margin:2px 0">
+          <span class="tmpl">${esc(pa).replace(/_+/g,'<u>___</u>')}</span></button>
+        <div class="tr"><b>${esc(rom)}</b> — ${esc(en)}</div>
+        <div class="ex-row">${exs.map(([epa,erom,een])=>`<button class="ex" data-say="${esc(epa)}">
+          <span class="pa">${esc(epa)}</span><span class="en">${esc(een)}</span></button>`).join('')}</div>
+      </div>`).join('')}`;
+  },
+  practice(){
+    return `<div class="intro"><h2>Practice quiz</h2><p>Match the Gurmukhi word to its meaning. Listen, then choose.</p></div>
+      <div class="quiz"><div class="qmeta"><span id="qcount"></span>
+      <span class="score-pill">★ <span id="qscore">0</span></span></div>
+      <div class="qcard" id="qcard"></div></div>`;
+  }
+};
+
+/* ---------- quiz ---------- */
+const quizPool=[...Object.values(vocab).flat(),
+  ...[...numbers,...Object.values(numbersMore).flat()].map(([pa,d,rom])=>[pa,rom,d])];
+let qIndex=0,qScore=0,qOrder=[];
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
+function startQuiz(){qIndex=0;qScore=0;qOrder=shuffle(quizPool).slice(0,10);renderQ();}
+function renderQ(){
+  const sc=document.getElementById('qscore'); if(sc)sc.textContent=qScore;
+  const cEl=document.getElementById('qcount'); if(cEl)cEl.textContent=`Question ${qIndex+1} of ${qOrder.length}`;
+  const card=document.getElementById('qcard'); if(!card)return;
+  if(qIndex>=qOrder.length){
+    card.innerHTML=`<div class="qprompt"><div style="font-family:var(--f-pa);font-size:2.6rem;color:var(--saffron)">ਸ਼ਾਬਾਸ਼!</div>
+      <p class="ask">You scored <b>${qScore} / ${qOrder.length}</b></p></div>
+      <button class="qnext" id="again">Play again</button>`;
+    document.getElementById('again').onclick=startQuiz;
+    if(qScore>=qOrder.length-2 && window.confetti)confetti({particleCount:120,spread:70,origin:{y:.6}});
+    return;
+  }
+  const item=qOrder[qIndex];
+  const answer=item[2];
+  const wrong=shuffle(quizPool.filter(x=>x[2]!==answer)).slice(0,3).map(x=>x[2]);
+  const opts=shuffle([answer,...wrong]);
+  card.innerHTML=`<div class="qprompt"><span class="ask">What does this mean?</span>
+    <div class="pa">${esc(item[0])}</div>
+    <button class="score-pill" id="qsay" style="border:0;cursor:pointer">♪ hear it</button></div>
+    <div class="opts">${opts.map(o=>`<button class="opt">${esc(o)}</button>`).join('')}</div>
+    <button class="qnext" id="qnext" hidden>Next →</button>`;
+  speak(item[0]);
+  document.getElementById('qsay').onclick=()=>speak(item[0]);
+  card.querySelectorAll('.opt').forEach(b=>{
+    b.onclick=()=>{
+      card.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(x.textContent===answer)x.classList.add('correct');});
+      if(b.textContent===answer){qScore++;document.getElementById('qscore').textContent=qScore;}
+      else b.classList.add('wrong');
+      const n=document.getElementById('qnext');n.hidden=false;n.onclick=()=>{qIndex++;renderQ();};
+    };
+  });
+}
+
+/* ---------- routing ---------- */
+function show(view){
+  el.innerHTML=views[view]();
+  document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',String(t.dataset.view===view)));
+  try{localStorage.setItem('bolpunjabi_tab',view)}catch(e){}
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(view==='practice')startQuiz();
+}
+document.getElementById('tabs').addEventListener('click',e=>{
+  const t=e.target.closest('.tab'); if(t)show(t.dataset.view);
+});
+el.addEventListener('click',e=>{
+  const c=e.target.closest('[data-say]'); if(c)speak(c.dataset.say);
+});
+
+/* theme toggle */
+const tb=document.getElementById('themeBtn');
+function sysDark(){return matchMedia('(prefers-color-scheme:dark)').matches}
+let theme=null; try{theme=localStorage.getItem('bolpunjabi_theme')}catch(e){}
+function applyTheme(){
+  if(theme)document.documentElement.setAttribute('data-theme',theme);
+  else document.documentElement.removeAttribute('data-theme');
+  const dark = theme? theme==='dark' : sysDark();
+  tb.textContent = dark?'☀':'☾';
+}
+applyTheme();
+tb.onclick=()=>{ const dark=theme?theme==='dark':sysDark(); theme=dark?'light':'dark';
+  try{localStorage.setItem('bolpunjabi_theme',theme)}catch(e){} applyTheme(); };
+
+/* start */
+let start='alphabet'; try{const s=localStorage.getItem('bolpunjabi_tab'); if(s&&views[s])start=s}catch(e){}
+show(start);
+</script>
+<script>
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});}
+</script>
+</body>
+</html>

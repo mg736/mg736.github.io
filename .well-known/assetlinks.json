@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.bolpunjabi.learn",
+    "sha256_cert_fingerprints": ["BF:06:2F:26:00:A1:5F:B4:92:D3:32:39:2B:97:25:39:44:FB:96:DB:51:D4:92:C9:12:A8:76:7F:82:A5:1E:C6"]
+  }
+}]
