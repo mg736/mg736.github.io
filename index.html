@@ -195,6 +195,17 @@ function speak(text){
   u.rate=.82; u.pitch=1;
   speechSynthesis.speak(u);
 }
+/* Robust tap-to-hear: use a Punjabi/Hindi voice for Gurmukhi if the device has one,
+   otherwise speak the romanization so there is always audible output. */
+function speakSmart(gur, rom){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance();
+  if(paVoice){ u.text=gur; u.voice=paVoice; u.lang=paVoice.lang; u.rate=.8; }
+  else { u.text=(rom&&rom.trim())?rom:gur; u.lang='en-IN'; u.rate=.72; }
+  u.pitch=1;
+  try{ speechSynthesis.speak(u); }catch(e){}
+}
 
 /* ---------- data ---------- */
 const vowels=[
@@ -290,12 +301,12 @@ const numbers=[
 const el=document.getElementById('view');
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function tile([pa,rom,en]){
-  return `<button class="card tile" data-say="${esc(pa)}">
+  return `<button class="card tile" data-say="${esc(pa)}" data-rom="${esc(rom||'')}">
     <span class="spk">♪</span><span class="pa">${esc(pa)}</span>
     <span class="rom">${esc(rom)}</span><span class="en">${esc(en||'')}</span></button>`;
 }
 function pcard([pa,rom,en]){
-  return `<button class="card pc" data-say="${esc(pa)}">
+  return `<button class="card pc" data-say="${esc(pa)}" data-rom="${esc(rom||'')}">
     <span class="pa">${esc(pa)}</span><span class="rom">${esc(rom)}</span>
     <span class="en">${esc(en)}</span><span class="spk">♪</span></button>`;
 }
@@ -304,6 +315,7 @@ const views={
   alphabet(){
     return `<div class="intro"><h2>The Gurmukhi script</h2>
       <p>Punjabi is written in Gurmukhi. Start with the ten vowel sounds, then the 35 base letters — the <em>Painti Akhari</em>. Tap any letter to hear it.</p></div>
+      <div class="hint"><span>🔊</span><div><b>Sound:</b> tap any card to hear it. If you only hear the romanized version, install a <b>Punjabi</b> or <b>Hindi</b> voice in your phone's <i>Settings → Text-to-speech → Google</i> for native audio.</div></div>
       <div class="hint"><span>👂</span><div><b>Tip:</b> Gurmukhi is a syllabic script — each consonant carries an inherent "a" sound, shaped by vowel marks (<i>laga matra</i>).</div></div>
       <div class="section-h">Vowel sounds · ਸ੍ਵਰ</div>
       <div class="grid g-letters">${vowels.map(tile).join('')}</div>
@@ -323,7 +335,7 @@ const views={
     return h;
   },
   numbers(){
-    const block=arr=>`<div class="grid g-num">${arr.map(([pa,d,rom])=>`<button class="card tile" data-say="${esc(rom)}">
+    const block=arr=>`<div class="grid g-num">${arr.map(([pa,d,rom])=>`<button class="card tile" data-say="${esc(rom)}" data-rom="${esc(rom)}">
         <span class="spk">♪</span><span class="pa">${esc(pa)}</span>
         <span class="rom">${esc(rom)}</span><span class="en">${d}</span></button>`).join('')}</div>`;
     let h=`<div class="intro"><h2>Counting · ਗਿਣਤੀ</h2>
@@ -356,7 +368,7 @@ const views={
         <span class="rom">${esc(rom)}</span></button>`).join('')}</div>`;
   },
   pronounce(){
-    const L=(chip,title,body,exs)=>`<div class="lesson"><h3>${chip?`<span class="chip">${chip}</span>`:''}${title}</h3><p>${body}</p>${exs?`<div class="ex-row">${exs.map(([pa,rom,en])=>`<button class="ex" data-say="${esc(pa)}"><span class="pa">${esc(pa)}</span><span class="rom">${esc(rom)}</span>${en?`<span class="en">${esc(en)}</span>`:''}</button>`).join('')}</div>`:''}</div>`;
+    const L=(chip,title,body,exs)=>`<div class="lesson"><h3>${chip?`<span class="chip">${chip}</span>`:''}${title}</h3><p>${body}</p>${exs?`<div class="ex-row">${exs.map(([pa,rom,en])=>`<button class="ex" data-say="${esc(pa)}" data-rom="${esc(rom||'')}"><span class="pa">${esc(pa)}</span><span class="rom">${esc(rom)}</span>${en?`<span class="en">${esc(en)}</span>`:''}</button>`).join('')}</div>`:''}</div>`;
     return `<div class="intro"><h2>How Punjabi sounds</h2>
       <p>Four features shape the sound of a word. Tap any example to hear the difference.</p></div>
       ${L('ਅ','The inherent vowel','Every consonant already says a short "a". ਕ is "ka", not just "k". You only write a vowel when it changes.',
@@ -377,7 +389,7 @@ const views={
         <button class="ex" data-say="${esc(pa.replace(/_+/g,''))}" style="border:0;background:none;padding:0;margin:2px 0">
           <span class="tmpl">${esc(pa).replace(/_+/g,'<u>___</u>')}</span></button>
         <div class="tr"><b>${esc(rom)}</b> — ${esc(en)}</div>
-        <div class="ex-row">${exs.map(([epa,erom,een])=>`<button class="ex" data-say="${esc(epa)}">
+        <div class="ex-row">${exs.map(([epa,erom,een])=>`<button class="ex" data-say="${esc(epa)}" data-rom="${esc(erom||'')}">
           <span class="pa">${esc(epa)}</span><span class="en">${esc(een)}</span></button>`).join('')}</div>
       </div>`).join('')}`;
   },
@@ -427,8 +439,8 @@ function renderQ(){
     <button class="score-pill" id="qsay" style="border:0;cursor:pointer">♪ hear it</button></div>
     <div class="opts">${opts.map(o=>`<button class="opt">${esc(o)}</button>`).join('')}</div>
     <button class="qnext" id="qnext" hidden>Next →</button>`;
-  speak(item[0]);
-  document.getElementById('qsay').onclick=()=>speak(item[0]);
+  speakSmart(item[0], item[1]);
+  document.getElementById('qsay').onclick=()=>speakSmart(item[0], item[1]);
   card.querySelectorAll('.opt').forEach(b=>{
     b.onclick=()=>{
       card.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(x.textContent===answer)x.classList.add('correct');});
@@ -525,7 +537,7 @@ document.getElementById('tabs').addEventListener('click',e=>{
   const t=e.target.closest('.tab'); if(t)show(t.dataset.view);
 });
 el.addEventListener('click',e=>{
-  const c=e.target.closest('[data-say]'); if(c)speak(c.dataset.say);
+  const c=e.target.closest('[data-say]'); if(c)speakSmart(c.dataset.say, c.dataset.rom);
 });
 
 /* theme toggle */
