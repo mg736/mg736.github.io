@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#e8830c">
 <meta name="description" content="Learn and speak Punjabi: Gurmukhi alphabet, phrases, pronunciation and practice.">
-<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <style>html,body{margin:0}</style>
@@ -160,6 +159,7 @@
   </div>
   <nav class="tabs" id="tabs" role="tablist">
     <button class="tab" role="tab" data-view="alphabet" aria-selected="true">ਪੈਂਤੀ Alphabet</button>
+    <button class="tab" role="tab" data-view="converse" aria-selected="false">🎙 Talk / Voice</button>
     <button class="tab" role="tab" data-view="writing" aria-selected="false">Writing</button>
     <button class="tab" role="tab" data-view="pronounce" aria-selected="false">Pronunciation</button>
     <button class="tab" role="tab" data-view="phrases" aria-selected="false">Phrases</button>
@@ -167,7 +167,6 @@
     <button class="tab" role="tab" data-view="vocab" aria-selected="false">Vocabulary</button>
     <button class="tab" role="tab" data-view="numbers" aria-selected="false">Numbers</button>
     <button class="tab" role="tab" data-view="practice" aria-selected="false">Practice</button>
-    <button class="tab" role="tab" data-view="converse" aria-selected="false">🎙 Converse</button>
   </nav>
 </header>
 
@@ -559,7 +558,9 @@ let start='alphabet'; try{const s=localStorage.getItem('bolpunjabi_tab'); if(s&&
 show(start);
 </script>
 <script>
-if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});}
+/* No service worker: always load the live page. Also tear down any old SW/cache from earlier versions. */
+try{ if("serviceWorker" in navigator){ navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister();});}).catch(function(){}); } }catch(e){}
+try{ if(self.caches){ caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k);});}).catch(function(){}); } }catch(e){}
 </script>
 </body>
 </html>
